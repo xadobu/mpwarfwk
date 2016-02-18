@@ -6,7 +6,8 @@ use Mpwarfwk\Component\Router\RouteParser\Parser;
 
 class Router
 {
-    private $fields = ['uri', 'controller', 'method'];
+    private $fields = ['method', 'uri', 'controller', 'function'];
+    private $methods = ['get', 'post', 'put', 'delete'];
 
     private $routes = [];
     private $parser;
@@ -24,21 +25,40 @@ class Router
             $keys = array_keys($rawRoute);
 
             if ($keys != $this->fields) {
-                throw new InvalidArgumentException("Error: routes must contain only a uri, a controller and a method. Check your routes configuration file.");
+                throw new InvalidArgumentException("Error: routes must contain only a http method, a uri, a controller and a function. Check your routes configuration file.");
+            }
+
+            if (!in_array($rawRoute['method'], $this->methods)) {
+                throw new InvalidArgumentException("Error: HTTP method \"" . $rawRoute['method'] . "\" not supported.");
             }
 
             if (array_key_exists($rawRoute['uri'], $routes)) {
                 throw new DuplicatedRouteException("Error: route \"" . $rawRoute['uri'] . "\" already defined.");
             }
 
-            $route = new Route($rawRoute['uri'], $rawRoute['controller'], $rawRoute['method']);
-            $routes[$rawRoute['uri']] = $route;
+            $route = new Route($rawRoute['method'], $rawRoute['uri'], $rawRoute['controller'], $rawRoute['method']);
+            $routes[$rawRoute['method']][$rawRoute['uri']] = $route;
         }
         $this->routes = $routes;
     }
 
-    public function getRoute($route)
+    public function get($route)
     {
-        return $this->routes[$route];
+        return $this->routes['get'][$route];
+    }
+
+    public function post($route)
+    {
+        return $this->routes['post'][$route];
+    }
+
+    public function put($route)
+    {
+        return $this->routes['put'][$route];
+    }
+
+    public function delete($route)
+    {
+        return $this->routes['delete'][$route];
     }
 }

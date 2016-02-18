@@ -5,15 +5,22 @@ namespace Mpwarfwk\Component\Router;
 
 class Route
 {
+    private $method;
     private $uri;
     private $controller;
-    private $method;
+    private $function;
 
-    public function __construct($uri, $controller, $method)
+    public function __construct($method, $uri, $controller, $function)
     {
+        $this->method = $method;
         $this->uri = $uri;
         $this->controller = $controller;
-        $this->method = $method;
+        $this->function = $function;
+    }
+
+    public function getMethod()
+    {
+        return $this->method;
     }
 
     public function getUri()
@@ -26,15 +33,15 @@ class Route
         return $this->controller;
     }
 
-    public function getMethod()
+    public function getFunction()
     {
-        return $this->method;
+        return $this->function;
     }
 
     public function getParameters($uri)
     {
         $paramsRegex = preg_replace("/{(\w+)}/", "(\w+|\d)", $this->uri);
-        $regex = "~".$paramsRegex."~";
+        $regex = "~" . $paramsRegex . "~";
         preg_match($regex, $uri, $paramValues);
         array_shift($paramValues);
 
@@ -43,7 +50,4 @@ class Route
 
         return array_combine($paramNames[0], $paramValues);
     }
-
-
-
 }

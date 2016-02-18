@@ -12,9 +12,10 @@ class Router
     private $routes = [];
     private $parser;
 
-    public function __construct(Parser $parser)
+    public function __construct(Parser $parser, $routesFile)
     {
         $this->parser = $parser;
+        $this->loadRoutes($routesFile);
     }
 
     public function loadRoutes($path)
@@ -36,29 +37,61 @@ class Router
                 throw new DuplicatedRouteException("Error: route \"" . $rawRoute['uri'] . "\" already defined.");
             }
 
-            $route = new Route($rawRoute['method'], $rawRoute['uri'], $rawRoute['controller'], $rawRoute['method']);
+            $route = new Route($rawRoute['method'], $rawRoute['uri'], $rawRoute['controller'], $rawRoute['function']);
             $routes[$rawRoute['method']][$rawRoute['uri']] = $route;
         }
         $this->routes = $routes;
     }
 
+    private function getRoute($routeUri, array $routesList)
+    {
+        $matched = null;  // TODO error 404
+        if (is_null($routesList)) {
+            return $matched;
+        }
+
+        foreach ($routesList as $route) {
+            if ($route->match($routeUri)) {
+                $matched = $route->getInfo();
+                break;
+            }
+        }
+        return $matched;
+    }
+
     public function get($route)
     {
-        return $this->routes['get'][$route];
+        if (!array_key_exists("get", $this->routes)) {
+            return null;  // TODO error 404
+        }
+
+        return $this->getRoute($route, $this->routes['get']);
     }
 
     public function post($route)
     {
-        return $this->routes['post'][$route];
+        if (!array_key_exists("post", $this->routes)) {
+            return null;  // TODO error 404
+        }
+
+        return $this->getRoute($route, $this->routes['post']);
     }
 
     public function put($route)
     {
-        return $this->routes['put'][$route];
+        if (!array_key_exists("put", $this->routes)) {
+            return null;  // TODO error 404
+        }
+
+        return $this->getRoute($route, $this->routes['put']);
     }
 
     public function delete($route)
     {
-        return $this->routes['delete'][$route];
+        if (!array_key_exists("delete", $this->routes)) {
+            return null;  // TODO error 404
+        }
+
+        return $this->getRoute($route, $this->routes['delete']);
     }
 }

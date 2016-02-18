@@ -10,12 +10,17 @@ class Route
     private $controller;
     private $function;
 
+    private $pattern;
+
     public function __construct($method, $uri, $controller, $function)
     {
         $this->method = $method;
         $this->uri = $uri;
         $this->controller = $controller;
         $this->function = $function;
+
+        $paramsRegex = preg_replace("/{(\w+)}/", "(\w+|\d)", $this->uri);
+        $this->pattern = "~^" . $paramsRegex . "$~";
     }
 
     public function getMethod()
@@ -38,11 +43,20 @@ class Route
         return $this->function;
     }
 
+    public function getInfo()
+    {
+        $info['controller'] = $this->getController();
+        $info['function'] = $this->getFunction();
+        return $info;
+    }
+
+    public function match($uri) {
+        return preg_match($this->pattern,$uri);
+    }
+
     public function getParameters($uri)
     {
-        $paramsRegex = preg_replace("/{(\w+)}/", "(\w+|\d)", $this->uri);
-        $regex = "~" . $paramsRegex . "~";
-        preg_match($regex, $uri, $paramValues);
+        preg_match($this->pattern, $uri, $paramValues);
         array_shift($paramValues);
 
         preg_match_all("/{(\w+)}/", $this->uri, $paramNames);

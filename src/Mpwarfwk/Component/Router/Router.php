@@ -2,7 +2,9 @@
 
 namespace Mpwarfwk\Component\Router;
 
-use Mpwarfwk\Component\Router\RouteParser\Parser;
+use Mpwarfwk\Component\Exception\DuplicatedEntryException;
+use Mpwarfwk\Component\Exception\InvalidArgumentException;
+use Mpwarfwk\Component\Parser\Parser;
 
 class Router
 {
@@ -20,13 +22,13 @@ class Router
 
     public function loadRoutes($path)
     {
-        $routesArray = $this->parser->parse($path);
+        $routesArray = $this->parser->parse($path,'routes');
         $routes = [];
         foreach ($routesArray as $rawRoute) {
             $keys = array_keys($rawRoute);
 
             if ($keys != $this->fields) {
-                throw new InvalidArgumentException("Error: routes must contain only a http method, a uri, a controller and a function. Check your routes configuration file.");
+                throw new InvalidArgumentException("Error: routes must contain only".implode(", ".$this->fields).". Check your routes configuration file.");
             }
 
             if (!in_array($rawRoute['method'], $this->methods)) {
@@ -34,7 +36,7 @@ class Router
             }
 
             if (array_key_exists($rawRoute['uri'], $routes)) {
-                throw new DuplicatedRouteException("Error: route \"" . $rawRoute['uri'] . "\" already defined.");
+                throw new DuplicatedEntryException("Error: route \"" . $rawRoute['uri'] . "\" already defined.");
             }
 
             $route = new Route($rawRoute['method'], $rawRoute['uri'], $rawRoute['controller'], $rawRoute['function']);

@@ -1,18 +1,16 @@
 <?php
 
-namespace Mpwarfwk\Component\Router\RouteParser;
+namespace Mpwarfwk\Component\Parser;
 
 use Symfony\Component\Yaml\Yaml;
 
 class YAMLParser implements Parser
 {
 
-    public function parse($path)
+    public function parse($path, $key)
     {
         $ymlArray = Yaml::parse(file_get_contents($path));
-
-        $routes = $ymlArray['routes'];
-
+        $routes = $ymlArray[$key];
         return $routes;
     }
 }

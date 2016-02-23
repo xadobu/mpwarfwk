@@ -1,6 +1,6 @@
 <?php
 
-namespace Mpwarfwk\Component\Router;
+namespace Mpwarfwk\Component\Exception;
 
 use Exception;
 

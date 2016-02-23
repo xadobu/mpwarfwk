@@ -1,10 +1,10 @@
 <?php
 
-namespace Mpwarfwk\Component\Router;
+namespace Mpwarfwk\Component\Exception;
 
 use Exception;
 
-class DuplicatedRouteException extends Exception
+class DuplicatedEntryException extends Exception
 {
     const EXCEPTION_CODE = 2;
 

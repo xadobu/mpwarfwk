@@ -12,15 +12,17 @@ class Container
     private $fields = ['name', 'class', 'arguments', 'tags', 'public', 'singleton'];
     private $parser;
     private $services = [];
+    private $serviceInstances = [];
     private $tags = [];
 
     public function __construct($path)
     {
         $this->parser = new YAMLParser();
-        $this->addServicesFromYAML($path,true);
+        $this->addServicesFromYAML($path, true);
     }
 
-    public function addServicesFromYAML($path, $strict = false) {
+    public function addServicesFromYAML($path, $strict = false)
+    {
         $servicesArray = $this->parser->parse($path, 'services');
 
         $services = [];
@@ -50,7 +52,8 @@ class Container
                 'class' => $rawService['class'],
                 'arguments' => $rawService['arguments'],
                 'public' => $rawService['public'],
-                'singleton' => $rawService['singleton']
+                'singleton' => $rawService['singleton'],
+                'resolved' => false
             ];
         }
         $this->services = $services;
@@ -63,45 +66,75 @@ class Container
         }
 
         $service = $this->services[$serviceName];
-        if ($service['public']) {
-            if ($service['singleton']) {
-                return $this->serviceInstance($service);
-            } else {
-                return $this->serviceFactory($service);
-            }
+
+        if (!$service['public']) {
+            throw new InvalidArgumentException("Error: service " . $serviceName . " is not public.");
         }
-        throw new InvalidArgumentException("Error: service " . $serviceName . " is not public.");
+        return $this->getService($service);
+    }
+
+    private function getService($service)
+    {
+        if (!$service['resolved']) {
+            $this->resolve($service);
+            $this->services[$service['name']]['resolved'] = true;
+        }
+        if ($service['singleton']) {
+            return $this->serviceInstance($this->services[$service['name']]);
+        }
+        return $this->serviceFactory($this->services[$service['name']]);
     }
 
     private function serviceInstance($service)
     {
-        return $this->serviceFactory($service);
+        if (is_bool($service['singleton'])) {
+            if (!array_key_exists($service['name'], $this->serviceInstances)) {
+                $this->serviceInstances[$service['name']] = $this->serviceFactory($service);
+            }
+            return $this->serviceInstances[$service['name']];
+        }
+        $args = $this->getServiceArguments($service);
+        return forward_static_call_array(array($service['name'], $service['singleton']), $args);
     }
 
     private function serviceFactory($service)
     {
-        echo "</br>";
-        $args = [];
-        $servicePositions = [];
-        if (is_array($service['arguments'])) {
-            foreach ($service['arguments'] as $argument) {
-                if (substr($argument, 0, 1) === '@') {
-                    $serviceName = substr($argument, 1);
-                    if (!array_key_exists($serviceName, $this->services)) {
-                        throw new InvalidArgumentException("Error: service " . $serviceName . " not defined. Could not create service " . $service['name'] . ".");
-                    }
-                    $args[] = $this->services[$serviceName];
-                    $servicePositions[] = sizeof($args) - 1;
-                } else {
-                    $args[] = $argument;
-                }
-            }
-            foreach ($servicePositions as $index) {
-                $args[$index] = $this->serviceFactory($args[$index]);
-            }
-        }
+        $args = $this->getServiceArguments($service);
         $r = new ReflectionClass($service['class']);
         return $r->newInstanceArgs($args);
     }
 
+    private function resolve($service)
+    {
+        if (is_null($service['arguments'])) {
+            return;
+        }
+        $args = [];
+        $services = [];
+        foreach ($service['arguments'] as $argument) {
+            if (substr($argument, 0, 1) === '@') {
+                $serviceName = substr($argument, 1);
+                if (!array_key_exists($serviceName, $this->services)) {
+                    throw new InvalidArgumentException("Error: service " . $serviceName . " not defined. Could not create service " . $service['name'] . ".");
+                }
+                $args[] = $this->services[$serviceName];
+                $services[] = sizeof($args) - 1;
+            } else {
+                $args[] = $argument;
+            }
+        }
+        foreach ($services as $index) {
+            $args[$index] = $this->getService($args[$index]);
+        }
+        $service['arguments'] = $args;
+        $this->services[$service['name']] = $service;
+    }
+
+    private function getServiceArguments($service)
+    {
+        if (is_null($service['arguments'])) {
+            $service['arguments'] = [];
+        }
+        return $service['arguments'];
+    }
 }

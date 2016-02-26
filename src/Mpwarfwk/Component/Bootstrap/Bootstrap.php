@@ -46,9 +46,10 @@ class Bootstrap
                 throw new InvalidArgumentException("Error: method {$request->getMethod()} not supported");
         }
         if (is_null($route)) {
-            return new Response(null, null, Response::HTTP_NOT_FOUND);
+            return new Response($request->getHeader(), "Error: Url not found", Response::HTTP_NOT_FOUND);
         }
         $controller = new $route['controller']($this->container);
-        return call_user_func_array(array($controller, $route['function']), array($route['params']));
+        $request->setParams($route['params']);
+        return call_user_func_array(array($controller, $route['function']), array($request));
     }
 }

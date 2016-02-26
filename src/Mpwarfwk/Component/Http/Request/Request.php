@@ -19,6 +19,7 @@ class Request
     protected $content;
 
     protected $pathInfo;
+    protected $params;
 
     protected function __construct(array $query = array(), array $request = array(), array $files = array(), array $cookies = array(), array $server = array(), array $session = array(), array $header = array(), $content = "")
     {
@@ -90,6 +91,33 @@ class Request
         if (is_null($key)) return $this->session;
         if (array_key_exists($key, $this->session)) return $this->session[$key];
         return $default;
+    }
+
+    public function getFiles()
+    {
+        return $this->files;
+    }
+
+    public function getHeader()
+    {
+        return $this->header;
+    }
+
+    public function getContent()
+    {
+        return $this->content;
+    }
+
+    public function get($key = null, $default = null)
+    {
+        if (is_null($key)) return $this->params;
+        if (array_key_exists($key, $this->params)) return $this->params[$key];
+        return $default;
+    }
+
+    public function setParams(array $params)
+    {
+        $this->params = $params;
     }
 
 

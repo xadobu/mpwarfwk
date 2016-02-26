@@ -47,7 +47,7 @@ class Router
 
     private function getRoute($routeUri, array $routesList)
     {
-        $matched = null;  // TODO error 404
+        $matched = null;
         if (is_null($routesList)) {
             return $matched;
         }
@@ -55,6 +55,7 @@ class Router
         foreach ($routesList as $route) {
             if ($route->match($routeUri)) {
                 $matched = $route->getInfo();
+                $matched['params'] = $route->getParameters($routeUri);
                 break;
             }
         }
@@ -64,7 +65,7 @@ class Router
     public function get($route)
     {
         if (!array_key_exists("get", $this->routes)) {
-            return null;  // TODO error 404
+            return null;
         }
 
         return $this->getRoute($route, $this->routes['get']);
@@ -73,7 +74,7 @@ class Router
     public function post($route)
     {
         if (!array_key_exists("post", $this->routes)) {
-            return null;  // TODO error 404
+            return null;
         }
 
         return $this->getRoute($route, $this->routes['post']);
@@ -82,7 +83,7 @@ class Router
     public function put($route)
     {
         if (!array_key_exists("put", $this->routes)) {
-            return null;  // TODO error 404
+            return null;
         }
 
         return $this->getRoute($route, $this->routes['put']);
@@ -91,7 +92,7 @@ class Router
     public function delete($route)
     {
         if (!array_key_exists("delete", $this->routes)) {
-            return null;  // TODO error 404
+            return null;
         }
 
         return $this->getRoute($route, $this->routes['delete']);

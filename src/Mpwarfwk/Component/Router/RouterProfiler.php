@@ -41,4 +41,5 @@ class RouterProfiler implements Profiler
         }
 
         return implode($glue, $newArray);
+    }
 }

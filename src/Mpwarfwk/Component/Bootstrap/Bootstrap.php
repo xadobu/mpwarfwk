@@ -52,4 +52,9 @@ class Bootstrap
         $request->setParams($route['params']);
         return call_user_func_array(array($controller, $route['function']), array($request));
     }
+
+    public function getTags($key = null)
+    {
+        return $this->container->getTags($key);
+    }
 }

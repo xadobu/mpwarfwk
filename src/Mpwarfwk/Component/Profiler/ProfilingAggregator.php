@@ -19,5 +19,6 @@ class ProfilingAggregator implements Profiler
             $info .= $profiler->displayInformation();
         }
         $info .= "</div>";
+        return $info;
     }
 }

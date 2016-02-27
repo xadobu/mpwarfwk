@@ -145,4 +145,11 @@ class Container
         }
         return $service['arguments'];
     }
+
+    public function getTags($key = null)
+    {
+        if (is_null($key)) return $this->tags;
+        if (array_key_exists($key, $this->tags)) return $this->tags[$key];
+        throw new InvalidArgumentException("Error: tag {$key} not defined");
+    }
 }

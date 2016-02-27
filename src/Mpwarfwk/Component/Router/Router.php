@@ -13,10 +13,12 @@ class Router
 
     private $routes = [];
     private $parser;
+    private $routerProfiler;
 
-    public function __construct(Parser $parser, $routesFile)
+    public function __construct(Parser $parser, $routesFile, RouterProfiler $routerProfiler)
     {
         $this->parser = $parser;
+        $this->routerProfiler = $routerProfiler;
         $this->loadRoutes($routesFile);
     }
 
@@ -41,6 +43,12 @@ class Router
 
             $route = new Route($rawRoute['method'], $rawRoute['uri'], $rawRoute['controller'], $rawRoute['function']);
             $routes[$rawRoute['method']][$rawRoute['uri']] = $route;
+            $this->routerProfiler->addRoute(array(
+                'method' => $rawRoute['method'],
+                'uri' => $rawRoute['uri'],
+                'controller' => $rawRoute['controller'],
+                'function' => $rawRoute['function']
+                ));
         }
         $this->routes = $routes;
     }
@@ -59,6 +67,9 @@ class Router
                 break;
             }
         }
+
+        $this->routerProfiler->setMatchedRoute($routeUri, $matched);
+
         return $matched;
     }
 

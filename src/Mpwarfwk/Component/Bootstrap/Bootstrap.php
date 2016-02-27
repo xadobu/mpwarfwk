@@ -57,4 +57,9 @@ class Bootstrap
     {
         return $this->container->getTags($key);
     }
+
+    public function getService($key)
+    {
+        return $this->container->get($key);
+    }
 }

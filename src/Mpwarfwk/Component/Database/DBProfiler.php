@@ -22,7 +22,7 @@ class DBProfiler implements Profiler
 
     public function displayInformation()
     {
-        $execution_time = ($this->time_end - $this->time_start) / 60;
-        return '<b>Total Execution Time:</b> ' . $execution_time . ' mins</br>';
+        $execution_time = ($this->time_end - $this->time_start);
+        return '<b>Database Total Execution Time:</b> ' . $execution_time . ' seconds</br>';
     }
 }

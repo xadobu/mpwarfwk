@@ -42,8 +42,12 @@ class Container
 
             if (is_array($rawService['tags'])) {
                 foreach ($rawService['tags'] as $tag) {
-                    $key = array_keys($tag)[0];
-                    $this->tags[$key][] = $rawService['name'];
+                    if (is_array($tag)) {
+                        $key = array_keys($tag)[0];
+                        $this->tags[$key][$tag[$key]] = $rawService['name'];
+                    } else {
+                        $this->tags[$tag][] = $rawService['name'];
+                    }
                 }
             }
 
@@ -112,6 +116,9 @@ class Container
         $args = [];
         $services = [];
         foreach ($service['arguments'] as $argument) {
+            if (is_array($argument)) {
+                $args[] = $argument;
+            }
             if (substr($argument, 0, 1) === '@') {
                 $serviceName = substr($argument, 1);
                 if (!array_key_exists($serviceName, $this->services)) {

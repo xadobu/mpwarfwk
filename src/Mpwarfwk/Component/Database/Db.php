@@ -17,10 +17,7 @@ class Db
     public function execute($statement, array $params = array())
     {
         $stmt = $this->connection->prepare($statement);
-        foreach ($params as $key => $value) {
-            $stmt->bindParam($key, $value);
-        }
-        return $stmt->execute();
+        return $stmt->execute($params);
     }
 
 }

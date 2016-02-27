@@ -24,9 +24,6 @@ class SmartyTemplating implements Templating
     {
         $smarty = new Smarty;
         $smarty->caching = true;
-        if( !$smarty->templateExists($template.".tpl") ){
-            throw new TemplateNotFoundException("Template ". $template . " not found.");
-        }
         if(!$smarty->isCached($template)) {
 
             foreach ($this->params as $key => $value) {

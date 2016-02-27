@@ -118,16 +118,17 @@ class Container
         foreach ($service['arguments'] as $argument) {
             if (is_array($argument)) {
                 $args[] = $argument;
-            }
-            if (substr($argument, 0, 1) === '@') {
-                $serviceName = substr($argument, 1);
-                if (!array_key_exists($serviceName, $this->services)) {
-                    throw new InvalidArgumentException("Error: service " . $serviceName . " not defined. Could not create service " . $service['name'] . ".");
-                }
-                $args[] = $this->services[$serviceName];
-                $services[] = sizeof($args) - 1;
             } else {
-                $args[] = $argument;
+                if (substr($argument, 0, 1) === '@') {
+                    $serviceName = substr($argument, 1);
+                    if (!array_key_exists($serviceName, $this->services)) {
+                        throw new InvalidArgumentException("Error: service " . $serviceName . " not defined. Could not create service " . $service['name'] . ".");
+                    }
+                    $args[] = $this->services[$serviceName];
+                    $services[] = sizeof($args) - 1;
+                } else {
+                    $args[] = $argument;
+                }
             }
         }
         foreach ($services as $index) {
